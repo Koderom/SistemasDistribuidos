@@ -5,10 +5,7 @@
 package ServidorSocket;
 
 import Events.ConnectionEvent;
-import Events.DataEvent;
 import Events.SocketListener;
-import static ServidorSocket.ServidorTCP.Clientes;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -29,8 +26,6 @@ public class HiloConexiones extends Thread {
        
     }
     public void run(){
-        SocketListener listener = new ServidorTCP();
-        this.addSocketListener(listener);
         while(true){
             try {
                 socket = servidor.accept();

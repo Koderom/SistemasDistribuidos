@@ -18,13 +18,15 @@ import Events.*;
  * @author MIRKO
  */
 public class ServidorTCP implements SocketListener{
-    public static Map<Integer, Socket> Clientes = new HashMap<Integer, Socket>();
+    public Map<Integer, Socket> Clientes = new HashMap<Integer, Socket>();
 
     @Override
     public void onClientConnected(ConnectionEvent event) {
         int key = Clientes.size()+1;
         Clientes.put(key, event.getClient());
-        new HiloServidorTCP(String.valueOf(key), event.getClient()).start();
+        HiloServidorTCP cliente = new HiloServidorTCP(String.valueOf(key), event.getClient());
+        cliente.addSocketListener(this);
+        cliente.start();
         System.out.println("Cliente "+key+" añadido al la lista");
     }
 
@@ -32,13 +34,16 @@ public class ServidorTCP implements SocketListener{
     public void onReadMessage(DataEvent event) {
         System.out.println("Cliente "+event.getClienteKey()+"-> "+event.getMesasge());
     }
-    public static void correrServidor(int puerto){
+    public void correrServidor(int puerto){
         ServerSocket servidor;
         try {
             servidor = new ServerSocket(puerto);
             System.out.println("Servidor TCP iniciado en el puerto "+puerto+"...");
+            //
             HiloConexiones conexiones = new HiloConexiones(servidor);
+            conexiones.addSocketListener(this);
             conexiones.start();
+            //
         } catch (IOException ex) {
             Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
         }

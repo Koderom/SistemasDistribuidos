@@ -7,7 +7,6 @@ package ServidorSocket;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.EventListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.event.EventListenerList;
@@ -28,8 +27,6 @@ public class HiloServidorTCP extends Thread{
     }
     @Override
     public void run(){
-        SocketListener listener = new ServidorTCP();
-        this.addSocketListener(listener);
         try {    
             while (true) {                    
                 entrada = new DataInputStream(socket.getInputStream());

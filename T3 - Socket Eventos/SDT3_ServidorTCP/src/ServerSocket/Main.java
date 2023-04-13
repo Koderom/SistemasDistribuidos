@@ -1,4 +1,4 @@
-package ClienteTCP;
+package ServerSocket;
 
 /**
  *
@@ -10,7 +10,8 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        ClienteTCP.correrCliente();
+        ServidorTCP servido = new ServidorTCP();
+        servido.correrServidor(5000);
     }
     
 }

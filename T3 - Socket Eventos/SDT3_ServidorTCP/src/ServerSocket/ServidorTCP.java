@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package ServidorSocket;
+package ServerSocket;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -13,12 +13,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import Events.*;
+import Models.Mensaje;
+import java.io.DataOutputStream;
+import java.io.ObjectOutputStream;
 /**
  *
  * @author MIRKO
  */
 public class ServidorTCP implements SocketListener{
-    public Map<Integer, Socket> Clientes = new HashMap<Integer, Socket>();
+    public Map<Integer, Socket> Clientes = new HashMap<>();
 
     @Override
     public void onClientConnected(ConnectionEvent event) {
@@ -27,12 +30,27 @@ public class ServidorTCP implements SocketListener{
         HiloServidorTCP cliente = new HiloServidorTCP(String.valueOf(key), event.getClient());
         cliente.addSocketListener(this);
         cliente.start();
-        System.out.println("Cliente "+key+" añadido al la lista");
+        System.out.println("Cliente "+key+" se unio al chat");
     }
 
     @Override
     public void onReadMessage(DataEvent event) {
-        System.out.println("Cliente "+event.getClienteKey()+"-> "+event.getMesasge());
+        System.out.println("Cliente "+event.getClienteKey()+" -> "+event.getMesasge());
+        
+        for(Integer key: Clientes.keySet()){
+            if(key != event.getClienteKey()){
+                Socket cliente = Clientes.get(key);
+                try {
+                    //DataOutputStream salida = new DataOutputStream(cliente.getOutputStream());
+                    ObjectOutputStream salida = new ObjectOutputStream(cliente.getOutputStream());
+                    //salida.writeUTF(event.getMesasge());
+                    Mensaje mensaje = new Mensaje(event.getMesasge(), event.getClienteKey(), 0);
+                    salida.writeObject(mensaje);
+                } catch (IOException ex) {
+                    Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
     }
     public void correrServidor(int puerto){
         ServerSocket servidor;

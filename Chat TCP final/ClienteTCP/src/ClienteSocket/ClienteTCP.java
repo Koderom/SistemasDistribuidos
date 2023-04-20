@@ -61,11 +61,21 @@ public class ClienteTCP {
             this.ID = Integer.parseInt(datos.get("ID"));
             System.out.println("Tu ID en el servidor es: "+ this.ID+", Ingrese un nombre de usuario");
             String nick = consola.readLine();
-            nick = nick.length() == 0 ? "unnamed_"+ID : nick;
+            nick = nick.length() == 0 ? "" : nick;
             Map<String, String> info = new HashMap<>();
             info.put("ID", String.valueOf(ID));
             info.put("NICK", nick);
             salida.writeUTF(MessageUtil.convertInfoToMessage(info, ""));
+            mensaje = entrada.readUTF();
+            datos = MessageUtil.convertMessageToInfo(mensaje);
+            if(datos.containsKey("ERROR")){
+                System.out.println("ERROR : "+datos.get("ERROR"));
+                registrarCliente(entrada, salida, consola);
+            }else {
+                String origen = datos.get("NICK");
+                String MSJ = datos.get("MSJ");
+                System.out.println("["+origen+"]:"+MSJ);
+            }
         } catch (Exception e) {
             System.out.println(e);
         }

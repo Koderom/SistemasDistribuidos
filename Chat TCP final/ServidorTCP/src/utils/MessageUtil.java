@@ -33,7 +33,7 @@ public class MessageUtil {
             String MSJ = mensaje.substring(info_fin+1, mensaje.length());
             contenido.put("MSJ",MSJ);
         }catch(Exception ex){
-            contenido.put("error", ex.toString());
+            contenido.put("ERROR", ex.toString());
         }finally{
             return contenido;
         }

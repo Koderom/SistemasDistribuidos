@@ -29,6 +29,10 @@ public class HiloCliente extends Thread{
             while (true) {
                 String mensaje = entrada.readUTF();
                 Map<String, String> datos = MessageUtil.convertMessageToInfo(mensaje);
+                if(datos.containsKey("ERROR")){
+                    System.out.println("ERROR : " + datos.get("ERROR"));
+                    continue;
+                }
                 int sourceid = Integer.parseInt(datos.get("ID"));
                 if(sourceid != id){
                     String origen = datos.get("NICK");

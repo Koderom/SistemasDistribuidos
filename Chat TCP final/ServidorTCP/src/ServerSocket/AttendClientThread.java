@@ -34,7 +34,8 @@ public class AttendClientThread extends Thread{
                 String mensaje = entrada.readUTF();
                 
                 Map<String, String> info = MessageUtil.convertMessageToInfo(mensaje);
-                if(info.containsKey("ID") && info.containsKey("NICK")) this.registrarCliente(socket, info);
+                if(info.containsKey("ERROR")) sendError(info);
+                else if(info.containsKey("ID") && info.containsKey("NICK")) this.registrarCliente(socket, info);
                 else if(info.containsKey("ID")) this.clientSendMenssage(info);
             }
         } catch (IOException ex) {
@@ -42,6 +43,19 @@ public class AttendClientThread extends Thread{
         }finally{
             DisconnectEvent event = new DisconnectEvent(this, this.ID);
             this.notifyDisconnectEvent(event);
+        }
+    }
+    private void sendError(Map<String, String> info){
+        DataOutputStream salida = null;
+        try {
+            salida = new DataOutputStream(socket.getOutputStream());
+            Map<String, String> error = new HashMap<>();
+            error.put("ID", "0");
+            error.put("ERROR", info.get("ERROR"));
+            String mensajeFormateado = MessageUtil.convertInfoToMessage(info, "");
+            salida.writeUTF(mensajeFormateado);
+        } catch (IOException ex) {
+            Logger.getLogger(AttendClientThread.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     private void iniciarRegistro(){
@@ -56,6 +70,12 @@ public class AttendClientThread extends Thread{
         }
     }
     private void registrarCliente(Socket socket, Map<String, String> info){
+        if(info.get("NICK").length() == 0){
+            info.put("ERROR", "No se especifico el nombre de usuario");
+            sendError(info);
+            iniciarRegistro();
+            return;
+        }
         UserRegistrationEvent event = new UserRegistrationEvent(this.ID, info.get("NICK"), socket, this);
         this.notifyUserRegistrationEvent(event);
     }

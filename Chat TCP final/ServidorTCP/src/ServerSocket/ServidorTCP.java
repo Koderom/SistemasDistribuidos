@@ -104,6 +104,7 @@ public class ServidorTCP implements SocketListener{
     public void onRegisteredUser(UserRegistrationEvent event) {
         Cliente cliente = new Cliente(event.getID(), event.getNick(), event.getSocket());
         Clientes.put(cliente.getKey(), cliente);
+        this.sendMessage(0, cliente.getKey(), "registrado correctamente");
         if(!verificando)this.startToVerify();
         this.sendMessageBroadcast(0, "Usuario "+cliente.getNick()+" se ha unido al chat");
     }

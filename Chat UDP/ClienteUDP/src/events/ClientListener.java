@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
  */
-package Events;
+package events;
 
 import java.util.EventListener;
 
@@ -10,10 +10,6 @@ import java.util.EventListener;
  *
  * @author MIRKO
  */
-public interface SocketListener extends EventListener {
-    public void onReceiveMessage(ReceiveMessageEvent event);
-    public void onClientArrives(ClientArriveEvent event);
-    public void onRegisterClient(RegisterClientEvent event);
+public interface ClientListener extends EventListener{
     public void onReceivePing(ReceivePingEvent event);
-    public void onInactiveClient(InactiveClientEvent event);
 }

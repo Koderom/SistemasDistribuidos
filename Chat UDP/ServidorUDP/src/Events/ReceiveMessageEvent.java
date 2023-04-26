@@ -12,13 +12,13 @@ import java.util.EventObject;
  *
  * @author MIRKO
  */
-public class ReceivePacketEvent extends EventObject {
+public class ReceiveMessageEvent extends EventObject {
     private DatagramPacket inputPacket;
     private InetAddress address;
     private int port;
     private String mensaje;
 
-    public ReceivePacketEvent(DatagramPacket inputPacket, InetAddress address, int port, String mensaje, Object source) {
+    public ReceiveMessageEvent(DatagramPacket inputPacket, InetAddress address, int port, String mensaje, Object source) {
         super(source);
         this.inputPacket = inputPacket;
         this.address = address;

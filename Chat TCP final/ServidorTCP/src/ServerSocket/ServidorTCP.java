@@ -93,7 +93,7 @@ public class ServidorTCP implements SocketListener{
         try {
             cl.getSocket().close();
             Clientes.remove(cl.getKey());
-            ((AttendClientThread)event.getSource()).interrupt();
+            //((AttendClientThread)event.getSource()).interrupt();
             this.sendMessageBroadcast(0, cl.getNick() + " se ha desconectado de servidor");
         } catch (IOException ex) {
             Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
@@ -108,7 +108,7 @@ public class ServidorTCP implements SocketListener{
         if(!verificando)this.startToVerify();
         this.sendMessageBroadcast(0, "Usuario "+cliente.getNick()+" se ha unido al chat");
     }
-
+    /*
     @Override
     public void onConnectionInterrupted(DisconnectEvent event) {
         try {
@@ -119,4 +119,5 @@ public class ServidorTCP implements SocketListener{
             Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    */
 }

@@ -53,7 +53,7 @@ public class VerifyConnectionThread extends Thread{
         Object[] listeners = listenerList.getListenerList();
         for (int i = 0; i < listeners.length; i = i + 2) {
             if(listeners[i] == SocketListener.class){
-                ((SocketListener) listeners[i+1]).onConnectionInterrupted(event);
+                ((SocketListener) listeners[i+1]).onClientDisconnect(event);
             }
         }
     }

@@ -59,30 +59,44 @@ public class ClienteTCP {
     private void registrarCliente(){
         try {
             String mensaje = input_stream.readUTF();
+            String tipo = "";
             Map<String, String> datos = Parse.convertMessageToInfo(mensaje);
             this.ID = Integer.parseInt(datos.get("ID"));
-            System.out.println("Tu ID en el servidor es: "+ this.ID+", Ingrese un nombre de usuario y contraseña");
-            System.out.print("nick: ");
-            String nick = consola.nextLine();
-            nick = nick.length() == 0 ? "" : nick;
-            System.out.print("password: ");
-            String password = consola.nextLine();
-            password = password.length() == 0 ? "" : password;
+            System.out.println("conectado con el servidor");
+            
             Map<String, String> info = new HashMap<>();
-            info.put("ID", String.valueOf(ID));
-            info.put("NICK", nick);
-            info.put("PASSWORD", password);
-            output_stream.writeUTF(Parse.convertInfoToMessage(info, ""));
-//            mensaje = entrada.readUTF();
-//            datos = MessageUtil.convertMessageToInfo(mensaje);
-//            if(datos.containsKey("ERROR")){
-//                System.out.println("ERROR : "+datos.get("ERROR"));
-//                registrarCliente(entrada, salida, consola);
-//            }else {
-//                String origen = datos.get("NICK");
-//                String MSJ = datos.get("MSJ");
-//                System.out.println("["+origen+"]:"+MSJ);
-//            }
+            while(true){
+                System.out.println("para iniciar sesion digite [L], para registrarse [R]");
+                String operacion = consola.nextLine();
+                if("L".equals(operacion)){
+                     tipo = "LOGIN";
+                     break;
+                }else if("R".equals(operacion)){
+                    tipo = "REG";
+                    break;
+                }else System.out.println("Opcion no valida");
+            }
+            
+            while(true){
+                System.out.print("nick: ");
+                String nick = consola.nextLine();
+                nick = nick.length() == 0 ? "" : nick;
+                System.out.print("password: ");
+                String password = consola.nextLine();
+                password = password.length() == 0 ? "" : password;
+
+                info.put("ID", String.valueOf(ID));
+                info.put("NICK", nick);
+                info.put("PASSWORD", password);
+                info.put("TYPE", tipo);
+                output_stream.writeUTF(Parse.convertInfoToMessage(info, ""));
+                
+                mensaje = input_stream.readUTF();
+                info = Parse.convertMessageToInfo(mensaje);
+                System.out.println(info.get("MSJ"));
+                System.out.println("-> "+mensaje);
+                if(info.containsKey("COD") && info.get("COD").equals("200")) return;
+            }
         } catch (Exception e) {
             System.out.println(e);
         }

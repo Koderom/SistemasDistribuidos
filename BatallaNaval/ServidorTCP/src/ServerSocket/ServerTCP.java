@@ -42,6 +42,7 @@ public class ServerTCP implements SocketListener{
             AttendConnectionTheread conexiones = new AttendConnectionTheread(servidor);
             conexiones.addSocketListener(this);
             conexiones.start();
+            
         } catch (IOException ex) {
             Logger.getLogger(ServerSocket.class.getName()).log(Level.SEVERE, null, ex);
         }

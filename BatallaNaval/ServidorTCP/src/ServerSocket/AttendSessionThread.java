@@ -31,8 +31,8 @@ public class AttendSessionThread extends Thread{
     public void run(){
         DataInputStream entrada;
         try {
+            entrada = new DataInputStream(socket.getInputStream());
             while (!isInterrupted()) {                    
-                entrada = new DataInputStream(socket.getInputStream());
                 String mensaje = entrada.readUTF();
                 ReceiveDataEvent event = new ReceiveDataEvent(this, mensaje, this.ID);
                 this.notifyReceiveDataEvent(event);

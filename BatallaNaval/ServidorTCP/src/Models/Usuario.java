@@ -11,20 +11,22 @@ import java.net.Socket;
  * @author MIRKO
  */
 public class Usuario {
-    private int id;
+    private int sesion_id;
     private String nick;
     private String password;
 
-    public Usuario(int id, String nick, String password) {
-        this.id = id;
+    public Usuario(int sesion_id, String nick, String password) {
+        this.sesion_id  = sesion_id;
         this.nick = nick;
         this.password = password;
     }
 
-    public int getId() {
-        return id;
+    public int getSesionId() {
+        return this.sesion_id;
     }
-
+    public void setSesionId(int sesion_id){
+        this.sesion_id = sesion_id;
+    }
     public String getNick() {
         return nick;
     }
@@ -32,10 +34,15 @@ public class Usuario {
     public String getPassword() {
         return password;
     }
+
+    @Override
+    public int hashCode() {
+        return (this.nick + this.password).hashCode();
+    }
     
     @Override
     public String toString(){
-        return String.format("{ID: %s, NICK: %s, PASSWORD: %s}", this.id, this.nick, this.password);
+        return String.format("{sesion_id: %s, NICK: %s, PASSWORD: %s}", this.sesion_id, this.nick, this.password);
     }
     
 }

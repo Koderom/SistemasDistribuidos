@@ -1,9 +1,13 @@
 package ClienteSocket;
 
+import ClientEvents.ClientListener;
+import ClientEvents.LostConnectionEvent;
+import ClientEvents.ReceiveMessageEvent;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Map;
+import javax.swing.event.EventListenerList;
 import utils.Parse;
 
 /**
@@ -25,11 +29,40 @@ public class ReceiveDataThread extends Thread{
             while (true) {
                 String mensaje = entrada.readUTF();
                 Map<String, String> datos = Parse.convertMessageToInfo(mensaje);
-                System.out.println("-> "+datos.get("MSJ"));
-            }           
+                ReceiveMessageEvent event = new ReceiveMessageEvent(mensaje, this);
+                this.notifyConnectionEvent(event);
+            }
         } catch (IOException ex) {
-            System.out.println("se cayo el servidor XD");
+            System.out.println("HiloReceiveData:  se perdio la conexion con el servidor");
+            LostConnectionEvent LC_event = new LostConnectionEvent(this);
+            this.notifyLostConnectionEvent(LC_event);
             //Logger.getLogger(ReceiveDataThread.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    /*-----------------Events-----------------*/
+    protected EventListenerList listenerList = new EventListenerList();
+    
+    public void addSocketListener(ClientListener listener){
+        listenerList.add(ClientListener.class, listener);
+    }
+    public void removeSocketListener(ClientListener listener){
+        listenerList.remove(ClientListener.class, listener);
+    }
+    public void notifyConnectionEvent(ReceiveMessageEvent event){
+        Object[] listeners = listenerList.getListenerList();
+        for (int i = 0; i < listeners.length; i = i + 2) {
+            if(listeners[i] == ClientListener.class){
+                ((ClientListener) listeners[i+1]).onReceiveMessage(event);
+            }
+        }
+    }
+    public void notifyLostConnectionEvent(LostConnectionEvent event){
+        Object[] listeners = listenerList.getListenerList();
+        for (int i = 0; i < listeners.length; i = i + 2) {
+            if(listeners[i] == ClientListener.class){
+                ((ClientListener) listeners[i+1]).onLostConnection(event);
+            }
         }
     }
 }

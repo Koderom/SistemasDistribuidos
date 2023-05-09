@@ -9,7 +9,7 @@ import java.util.EventListener;
 public interface SocketListener extends EventListener{
     public void onClientConnected(ConnectionEvent event);
     public void onReceiveData(ReceiveDataEvent event);
-    public void onClientDisconnect(DisconnectEvent event);
+    public void onSessionDisconnect(DisconnectEvent event);
     public void onRegisteredUser(UserRegistrationEvent event);
     //public void onConnectionInterrupted(DisconnectEvent event);
 }

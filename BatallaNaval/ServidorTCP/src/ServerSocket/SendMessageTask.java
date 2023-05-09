@@ -23,6 +23,7 @@ public class SendMessageTask extends Thread{
     public void run() {
         try {
             DataOutputStream salida = new DataOutputStream(sesion.getSocket().getOutputStream());
+            System.out.println("enviando: "+mensaje);
             salida.writeUTF(mensaje);
         } catch (IOException ex) {
             Logger.getLogger(SendMessageTask.class.getName()).log(Level.SEVERE, null, ex);

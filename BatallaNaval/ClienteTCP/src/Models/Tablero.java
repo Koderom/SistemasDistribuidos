@@ -33,15 +33,15 @@ public class Tablero {
         return casillas;
     }
     
-    public void colocarBarco(int fil, int col, int size, char orientacion){
+    public boolean colocarBarco(int fil, int col, int size, char orientacion){
         char tabla[][] = this.casillas.clone();
-        if(fil < 0 || col < 0 || fil >= dimencion || col >= dimencion) return;
+        if(fil < 0 || col < 0 || fil >= dimencion || col >= dimencion) return false;
         switch (orientacion) {
             case 'V':
                 for(int i = 0; i < size; i++){
                     if(casillas[fil+i][col] == 'B'){
                         this.casillas = tabla;
-                        return;
+                        return false;
                     }
                     casillas[fil+i][col] = 'B';
                 }
@@ -50,7 +50,7 @@ public class Tablero {
                 for(int j = 0; j < size; j++){
                     if(casillas[fil][col+j] == 'B'){
                         this.casillas = tabla;
-                        return;
+                        return false;
                     }
                     casillas[fil][col+j] = 'B';
                 } 
@@ -59,19 +59,16 @@ public class Tablero {
                 for(int i = 0; i < size; i++) casillas[fil][col+i] = 'B';
         }
         barcos.add(new Nave(fil, col, size, orientacion));
+        return true;
     }
     
     public boolean acertoDisparo(int x, int y ){
         return casillas[x][y] == 'B';
     }
     
-    public String ejecutarDisparo(int x, int y){
-        if(!acertoDisparo(x, y)) return "fallo";
-        else{
-            Nave nave = getNave(x, y);
-            this.destruirBarco(x, y);
-            return nave.toString();
-        }
+    public void ejecutarDisparo(int x, int y){
+        if(!acertoDisparo(x, y)) return;
+        this.eliminarBarco(x, y);
     }
     
     public Nave getNave(int fil, int col){
@@ -89,15 +86,15 @@ public class Tablero {
         return null;
     }
     
-    public void destruirBarco(int fil, int col){
+    public void eliminarBarco(int fil, int col){
         Nave barco = this.getNave(fil, col);
         if(barco == null) return;
         if(barco.orientacion == 'V')
             for(int i = barco.x ; i < barco.x + barco.size; i++)
-                this.casillas[i][col] = 'X';
+                this.casillas[i][col] = 'O';
         if(barco.orientacion == 'H')
             for(int j = barco.x ; j < barco.y + barco.size; j++)
-                this.casillas[fil][j] = 'X';
+                this.casillas[fil][j] = 'O';
         this.barcos.remove(barco);
     }
     
@@ -136,7 +133,7 @@ public class Tablero {
         }
         @Override
         public String toString(){
-            return String.format("%s:%s:%s:%s", orientacion, size, x, y);
+            return String.format("%s%s(%s,%s)", orientacion, size, x, y);
         }
     }
 }

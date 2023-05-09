@@ -1,4 +1,6 @@
 import Data.Datos;
+import Models.Barco;
+import Models.Tablero;
 import ServerGame.ServerGame;
 import ServerSocket.ServerTCP;
 

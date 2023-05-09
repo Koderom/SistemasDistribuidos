@@ -3,6 +3,7 @@ package ServerSocket;
 import GameEvents.NewSessionEvent;
 import GameEvents.ReceiveMessageEvent;
 import GameEvents.ServerGameListener;
+import GameEvents.UserDisconnectEvent;
 import SocketEvents.DisconnectEvent;
 import SocketEvents.ConnectionEvent;
 import SocketEvents.SocketListener;
@@ -11,15 +12,10 @@ import SocketEvents.UserRegistrationEvent;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import Models.Usuario;
 import Models.Sesion;
-import java.io.DataOutputStream;
-import java.util.Random;
 import javax.swing.event.EventListenerList;
-import utils.Parse;
 
 /**
  *
@@ -92,16 +88,17 @@ public class ServerTCP implements SocketListener{
     }
 
     @Override
-    public void onClientDisconnect(DisconnectEvent event) {
-//        Cliente cl = Clientes.get(event.getKey());
-//        try {
-//            cl.getSocket().close();
-//            Clientes.remove(cl.getKey());
-//            //((AttendClientThread)event.getSource()).interrupt();
-//            this.sendMessageBroadcast(0, cl.getNick() + " se ha desconectado de servidor");
-//        } catch (IOException ex) {
-//            Logger.getLogger(ServerSocket.class.getName()).log(Level.SEVERE, null, ex);
-//        }
+    public void onSessionDisconnect(DisconnectEvent event) {
+        Sesion session = this.Sesiones.get(event.getSession_id());
+        try {
+            session.getSocket().close();
+            this.Sesiones.remove(session.getID());
+            
+            UserDisconnectEvent game_event = new UserDisconnectEvent(event.getSession_id(), this);
+            this.notifyUserDisconnectEvent(game_event);
+        } catch (IOException ex) {
+            Logger.getLogger(ServerSocket.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
@@ -146,6 +143,14 @@ public class ServerTCP implements SocketListener{
         for (int i = 0; i < listeners.length; i = i + 2) {
             if(listeners[i] == ServerGameListener.class){
                 ((ServerGameListener) listeners[i+1]).onNewSession(event);
+            }
+        }
+    }
+    public void notifyUserDisconnectEvent(UserDisconnectEvent event){
+        Object[] listeners = listenerList.getListenerList();
+        for (int i = 0; i < listeners.length; i = i + 2) {
+            if(listeners[i] == ServerGameListener.class){
+                ((ServerGameListener) listeners[i+1]).onUserDisconnect(event);
             }
         }
     }

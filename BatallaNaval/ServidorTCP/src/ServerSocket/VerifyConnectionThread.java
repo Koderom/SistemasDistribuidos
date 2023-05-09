@@ -30,12 +30,12 @@ public class VerifyConnectionThread extends Thread{
         while (true) {            
             for (Sesion sesion : sesiones.values()) {
                 try {
-                    if(!sesion.getSocket().getInetAddress().isReachable(5000)){
+                    if(!sesion.getSocket().getInetAddress().isReachable(500)){
                         DisconnectEvent event = new DisconnectEvent(this, sesion.getID());
                         this.notifyDisconnectEvent(event);
                     }
                 } catch (IOException ex) {
-                    Logger.getLogger(VerifyConnectionThread.class.getName()).log(Level.SEVERE, null, ex);
+                    //Logger.getLogger(VerifyConnectionThread.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
@@ -53,7 +53,7 @@ public class VerifyConnectionThread extends Thread{
         Object[] listeners = listenerList.getListenerList();
         for (int i = 0; i < listeners.length; i = i + 2) {
             if(listeners[i] == SocketListener.class){
-                ((SocketListener) listeners[i+1]).onClientDisconnect(event);
+                ((SocketListener) listeners[i+1]).onSessionDisconnect(event);
             }
         }
     }

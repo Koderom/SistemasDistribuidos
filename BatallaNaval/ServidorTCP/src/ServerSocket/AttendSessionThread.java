@@ -38,8 +38,7 @@ public class AttendSessionThread extends Thread{
                 this.notifyReceiveDataEvent(event);
             }
         } catch (IOException ex) {
-            Logger.getLogger(ServerTCP.class.getName()).log(Level.SEVERE, null, ex);
-        }finally{
+            //Logger.getLogger(ServerTCP.class.getName()).log(Level.SEVERE, null, ex);
             DisconnectEvent event = new DisconnectEvent(this, this.ID);
             this.notifyDisconnectEvent(event);
         }
@@ -74,7 +73,7 @@ public class AttendSessionThread extends Thread{
         Object[] listeners = listenerList.getListenerList();
         for (int i = 0; i < listeners.length; i = i + 2) {
             if(listeners[i] == SocketListener.class){
-                ((SocketListener) listeners[i+1]).onClientDisconnect(event);
+                ((SocketListener) listeners[i+1]).onSessionDisconnect(event);
             }
         }
     }

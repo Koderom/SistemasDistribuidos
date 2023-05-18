@@ -4,11 +4,22 @@
  */
 package ClienteSocket;
 
+import BatallaEvents.BarcoEliminadoEvent;
+import BatallaEvents.BatallaListener;
+import BatallaEvents.GanadorEvent;
+import BatallaEvents.JugadorPerdioEvent;
+import BatallaEvents.SiguienteTurnoEvent;
 import ClientEvents.ClientListener;
 import ClientEvents.ConnectionEstablishedEvent;
 import ClientEvents.LostConnectionEvent;
 import ClientEvents.ReceiveMessageEvent;
 import ClientEvents.TryConnectionEvent;
+import CrearTableroEvents.CrearTableroListener;
+import CrearTableroEvents.EntrarSalaEsperaEvent;
+import SalaEsperaEvents.EmpezarBatallaEvent;
+import SalaEsperaEvents.JugadorListoEvent;
+import SalaEsperaEvents.PuedeComenzarEvent;
+import SalaEsperaEvents.SalaEsperaListener;
 import ViewEvents.ConnectedEvent;
 import ViewEvents.CrearTableroEvent;
 import ViewEvents.ReconnectedEvent;
@@ -125,31 +136,98 @@ public class ClienteTCP implements ClientListener{
     }
     public void interpretarMensaje(HashMap<String, String> info){
         if(info.containsKey("TYPE") && info.get("TYPE").equals("CREAR_TABLERO")) empezarCrearTablero(info);
-        else if(info.containsKey("TYPE") && info.get("TYPE").equals("SALA_ESPERA")) notificarEntradaSala(info);
-        else if(info.containsKey("TYPE") && info.get("TYPE").equals("BATALLA")) notificarInicioBatalla(info);
+        else if(info.containsKey("TYPE") && info.get("TYPE").equals("ENTRAR_SALA")) notificarEntradaSala(info);
+        else if(info.containsKey("TYPE") && info.get("TYPE").equals("CONTRINCANTE_EN_SALA")) notificarJugadorEnSala(info);
+        else if(info.containsKey("TYPE") && info.get("TYPE").equals("JUGADOR_SALA_LISTO")) notificarJugadorEnSalaListo(info);
+        else if(info.containsKey("TYPE") && info.get("TYPE").equals("PUEDE_COMENZAR")) notificarPuedeComenzar(info);
+        else if(info.containsKey("TYPE") && info.get("TYPE").equals("EMPEZAR_BATALLA")) notificarInicioBatalla(info);
         else if(info.containsKey("TYPE") && info.get("TYPE").equals("RESULTADO_DISPARO")) notificarResultadoDisparo(info);
+        else if(info.containsKey("TYPE") && info.get("TYPE").equals("BARCO_ELIMINADO")) notificarBarcoEliminado(info);
+        else if(info.containsKey("TYPE") && info.get("TYPE").equals("JUGADOR_PERDIO")) notificarJugadorPerdio(info);
+        else if(info.containsKey("TYPE") && info.get("TYPE").equals("GANADOR")) notificarGanador(info);
+        else if(info.containsKey("TYPE") && info.get("TYPE").equals("SIGUIENTE_TURNO")) notificarSiguienteTurno(info);
         else System.out.println(info);
     }
+    private void notificarGanador(Map<String, String> info){
+        GanadorEvent event = new GanadorEvent(info.get("JUGADOR"), this);
+        notifyGanadorEvent(event);
+    }
+    private void notificarJugadorPerdio(Map<String, String> info){
+        JugadorPerdioEvent event = new JugadorPerdioEvent(info.get("JUGADOR"), this);
+        notifyJugadorPerdioEvent(event);
+    }
+    private void notificarBarcoEliminado(Map<String, String> info){
+        int fila = Integer.parseInt(info.get("FIL"));
+        int columna = Integer.parseInt(info.get("COL"));
+        int size = Integer.valueOf(info.get("SIZE"));
+        char orientacion = info.get("ORIENTACION").charAt(0);
+        BarcoEliminadoEvent event = new BarcoEliminadoEvent(fila, columna, size, orientacion, info.get("OBJETIVO"), info.get("AUTOR"), this);
+        notifyBarcoEliminadoEvent(event);
+    }
+    private void notificarSiguienteTurno(Map<String, String> info){
+        SiguienteTurnoEvent event = new SiguienteTurnoEvent(info.get("TURNO"), this);
+        notifySiguienteTurnoEvent(event);
+    }
+    public void empezarBatalla(){
+        try {
+            HashMap<String, String> info = new HashMap<>();
+            info.put("ID", String.valueOf(this.sesion_id));
+            info.put("TYPE", "EMPEZAR_BATALLA");
+            String mensaje = Parse.convertInfoToMessage(info, "");
+            this.output_stream.writeUTF(mensaje);
+        } catch (IOException ex) {
+            Logger.getLogger(ClienteTCP.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    private void notificarPuedeComenzar(Map<String, String> info){
+        SalaEsperaEvents.PuedeComenzarEvent sala_event = new PuedeComenzarEvent(this);
+        notifyPuedeComenzarEvent(sala_event);
+    }
+    private void notificarJugadorEnSalaListo(Map<String, String> info){
+        String nick = info.get("NICK");
+        SalaEsperaEvents.JugadorListoEvent sala_event = new JugadorListoEvent(nick, socket);
+        this.notifyJugadorListoEvent(sala_event);
+    }
+    private void notificarJugadorEnSala(Map<String, String> info){
+        int contrincante_session_id = Integer.parseInt(info.get("ID_CONTRINCANTE"));
+        String contrincante_nick = info.get("NICK_CONTRINCANTE");
+        String rol = info.get("ROL");
+        boolean listo = (info.get("LISTO").equals("SI"));
+        SalaEsperaEvents.JugadorEnSalaEvent sala_espera_event  = new SalaEsperaEvents.JugadorEnSalaEvent(contrincante_session_id, contrincante_nick, rol, listo, this);
+        this.notifyJugadorEnSalaEvent(sala_espera_event);
+    }
     private void notificarResultadoDisparo(Map<String, String> info){
-        String resulatado = info.get("RESULTADO");
-        int fila = Integer.parseInt(info.get("FILA"));
-        int columna = Integer.parseInt(info.get("COLUMNA"));
-        ViewEvents.ResultadoDisparoEvent view_event = new ViewEvents.ResultadoDisparoEvent(resulatado  , fila, columna, this);
-        this.notifyResulatadoDisparoEvent(view_event);
+        char resulatado = info.get("RESULTADO").charAt(0);
+        int fila = Integer.parseInt(info.get("FIL"));
+        int columna = Integer.parseInt(info.get("COL"));
+        BatallaEvents.ResultadoDisparoEvent batalla_events = new BatallaEvents.ResultadoDisparoEvent(info.get("AUTOR"), info.get("OBJETIVO"), fila, columna, resulatado, this);
+        this.notifyResultadoDisparoEvent(batalla_events);        
     }
     public void empezarCrearTablero(HashMap<String, String> info){
         int dimencion = Integer.parseInt(info.get("DIM"));
         this.notifyGameStartEvent(new CrearTableroEvent(dimencion, this));
     }
-    public void dispararA(int contrincante_session_id, int fila, int columna){
+    public void jugadorEnSalaListo(){
         try {
             HashMap<String, String> info = new HashMap<>();
             info.put("ID", String.valueOf(this.sesion_id));
-            info.put("TYPE", "DISPARAR_A");
-            info.put("CONTRINCANTE", String.valueOf(contrincante_session_id));
+            info.put("TYPE", "JUGADOR_SALA_LISTO");
+            String mensaje = Parse.convertInfoToMessage(info, "");
+            this.output_stream.writeUTF(mensaje);
+        } catch (IOException ex) {
+            Logger.getLogger(ClienteTCP.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    public void dispararA(String nick, int fila, int columna){
+        try {
+            HashMap<String, String> info = new HashMap<>();
+            info.put("ID", String.valueOf(this.sesion_id));
+            info.put("TYPE", "DISPARAR");
+            info.put("OBJETIVO", nick);
             info.put("FILA", String.valueOf(fila));
             info.put("COLUMNA", String.valueOf(columna));
             String mensaje = Parse.convertInfoToMessage(info, "");
+            
             this.output_stream.writeUTF(mensaje);
         } catch (IOException ex) {
             Logger.getLogger(ClienteTCP.class.getName()).log(Level.SEVERE, null, ex);
@@ -182,14 +260,17 @@ public class ClienteTCP implements ClientListener{
         }
     }
     public void notificarInicioBatalla(HashMap<String, String> info){
-        int contrincante_session_id = Integer.parseInt(info.get("CONTRINCANTE_ID"));
-        String contrincante_nick = info.get("CONTRINCANTE_NICK");
-        ViewEvents.StartBatallaEvent view_event = new ViewEvents.StartBatallaEvent(contrincante_session_id, contrincante_nick, this);
-        this.notifyStartBatallaEvent(view_event);
+        String primer_turno = info.get("PRIMER_TURNO");
+        SalaEsperaEvents.EmpezarBatallaEvent sala_event = new EmpezarBatallaEvent(primer_turno, this);
+        this.notifyEmpezarBatallaEvent(sala_event);
     }
     private void notificarEntradaSala(HashMap<String, String> info) {
-        ViewEvents.SalaEsperaEvent view_event = new ViewEvents.SalaEsperaEvent(this);
-        this.notifySalaEsperaEvent(view_event);
+        String nick = info.get("NICK");
+        String rol = info.get("ROL");
+        int session_id = Integer.parseInt(info.get("ID"));
+        
+        CrearTableroEvents.EntrarSalaEsperaEvent event = new EntrarSalaEsperaEvent(nick, session_id, rol, this);
+        this.notifyEntrarSalaEsperaEvent(event);
     }
     @Override
     public void onConnectionEstablished(ConnectionEstablishedEvent event) {
@@ -270,11 +351,11 @@ public class ClienteTCP implements ClientListener{
             }
         }
     }
-    public void notifyStartBatallaEvent(ViewEvents.StartBatallaEvent event){
+    public void notifyStartBatallaEvent(ViewEvents.EmpezarBatallaEvent event){
         Object[] listeners = listenerList.getListenerList();
         for (int i = 0; i < listeners.length; i = i + 2) {
             if(listeners[i] == ViewListener.class){
-                ((ViewListener) listeners[i+1]).onStartBatalla(event);
+                ((ViewListener) listeners[i+1]).onEmpezarBatalla(event);
             }
         }
     }
@@ -294,7 +375,107 @@ public class ClienteTCP implements ClientListener{
             }
         }
     }
-
+    /*---------------------------SALA DE ESPERA-------------------------------*/
+    public void addSalaEsperaListener(SalaEsperaEvents.SalaEsperaListener listener){
+        listenerList.add(SalaEsperaListener.class, listener);
+    }
+    public void removeSalaEsperaListener(SalaEsperaEvents.SalaEsperaListener listener){
+        listenerList.remove(SalaEsperaListener.class, listener);
+    }
+    public void notifyJugadorEnSalaEvent(SalaEsperaEvents.JugadorEnSalaEvent event){
+        Object[] listeners = listenerList.getListenerList();
+        for (int i = 0; i < listeners.length; i = i + 2) {
+            if(listeners[i] == SalaEsperaListener.class){
+                ((SalaEsperaListener) listeners[i+1]).onJugadorEnSala(event);
+            }
+        }
+    }
+    public void notifyJugadorListoEvent(SalaEsperaEvents.JugadorListoEvent event){
+        Object[] listeners = listenerList .getListenerList();
+        for (int i = 0; i < listeners.length; i = i + 2) {
+            if(listeners[i] == SalaEsperaListener.class){
+                ((SalaEsperaListener) listeners[i+1]).onJugadorListo(event);
+            }
+        }
+    }
+    public void notifyPuedeComenzarEvent(SalaEsperaEvents.PuedeComenzarEvent event){
+        Object[] listeners = listenerList.getListenerList();
+        for (int i = 0; i < listeners.length; i = i + 2) {
+            if(listeners[i] == SalaEsperaListener.class){
+                ((SalaEsperaListener) listeners[i+1]).onPuedeComenzar(event);
+            }
+        }
+    }
+    public void notifyEmpezarBatallaEvent(SalaEsperaEvents.EmpezarBatallaEvent event){
+        Object[] listeners = listenerList.getListenerList();
+        for (int i = 0; i < listeners.length; i = i + 2) {
+            if(listeners[i] == SalaEsperaListener.class){
+                ((SalaEsperaListener) listeners[i+1]).onEmpezarBatalla(event);
+            }
+        }
+    }
+    /*---------------------------CREAR TABLERO-------------------------------*/
+    public void addCrearTableroListener(CrearTableroEvents.CrearTableroListener listener){
+        listenerList.add(CrearTableroListener.class, listener);
+    }
+    public void removeCrearTableroListener(CrearTableroEvents.CrearTableroListener listener){
+        listenerList.remove(CrearTableroListener.class, listener);
+    }
+    public void notifyEntrarSalaEsperaEvent(CrearTableroEvents.EntrarSalaEsperaEvent event){
+        Object[] listeners = listenerList.getListenerList();
+        for (int i = 0; i < listeners.length; i = i + 2) {
+            if(listeners[i] == CrearTableroListener.class){
+                ((CrearTableroListener) listeners[i+1]).onEntrarSalaEspera(event);
+            }
+        }
+    }
     
+    /*-----------------batalla events-----------------------------------------*/
+    public void addBatallaListener(BatallaListener listener){
+        listenerList.add(BatallaListener.class, listener);
+    }
+    public void removeBatallaListener(BatallaListener listener){
+        listenerList.remove(BatallaListener.class, listener);
+    }
+    public void notifyResultadoDisparoEvent(BatallaEvents.ResultadoDisparoEvent event){
+        Object[] listeners = listenerList.getListenerList();
+        for (int i = 0; i < listeners.length; i = i + 2) {
+            if(listeners[i] == BatallaListener.class){
+                ((BatallaListener) listeners[i+1]).onResultadoDisparo(event);
+            }
+        }
+    }
+    public void notifySiguienteTurnoEvent(BatallaEvents.SiguienteTurnoEvent event){
+        Object[] listeners = listenerList.getListenerList();
+        for (int i = 0; i < listeners.length; i = i + 2) {
+            if(listeners[i] == BatallaListener.class){
+                ((BatallaListener) listeners[i+1]).onSiguienteTurno(event);
+            }
+        }
+    }
+    public void notifyBarcoEliminadoEvent(BatallaEvents.BarcoEliminadoEvent event){
+        Object[] listeners = listenerList.getListenerList();
+        for (int i = 0; i < listeners.length; i = i + 2) {
+            if(listeners[i] == BatallaListener.class){
+                ((BatallaListener) listeners[i+1]).onBarcoEliminado(event);
+            }
+        }
+    }
+    public void notifyJugadorPerdioEvent(BatallaEvents.JugadorPerdioEvent event){
+        Object[] listeners = listenerList.getListenerList();
+        for (int i = 0; i < listeners.length; i = i + 2) {
+            if(listeners[i] == BatallaListener.class){
+                ((BatallaListener) listeners[i+1]).onJugadorPerdio(event);
+            }
+        }
+    }
     
+    public void notifyGanadorEvent(BatallaEvents.GanadorEvent event){
+        Object[] listeners = listenerList.getListenerList();
+        for (int i = 0; i < listeners.length; i = i + 2) {
+            if(listeners[i] == BatallaListener.class){
+                ((BatallaListener) listeners[i+1]).onGanador(event);
+            }
+        }
+    }
 }

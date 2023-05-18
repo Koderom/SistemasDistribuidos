@@ -12,4 +12,8 @@ import java.util.EventListener;
  */
 public interface BatallaListener extends EventListener{
     public void onResultadoDisparo(ResultadoDisparoEvent event);
+    public void onSiguienteTurno(SiguienteTurnoEvent event);
+    public void onBarcoEliminado(BarcoEliminadoEvent event);
+    public void onJugadorPerdio(JugadorPerdioEvent event);
+    public void onGanador(GanadorEvent event);
 }

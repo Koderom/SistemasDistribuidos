@@ -15,7 +15,7 @@ public interface ViewListener extends EventListener{
     public void onReconnected(ReconnectedEvent event);
     public void onTryConnection(TryConnectionEvent event);
     public void onCrearTablero(CrearTableroEvent event);
-    public void onStartBatalla(StartBatallaEvent event);
+    public void onEmpezarBatalla(EmpezarBatallaEvent event);
     public void onSalaEspera(SalaEsperaEvent event);
     public void onResultadoDisparo(ResultadoDisparoEvent event);
 }

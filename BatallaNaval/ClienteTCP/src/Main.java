@@ -21,5 +21,6 @@ public class Main {
 //        }
         Views.MainForm main = new MainForm();
         main.setVisible(true);
+//        Views.MainForm.main(args);
     }
 }

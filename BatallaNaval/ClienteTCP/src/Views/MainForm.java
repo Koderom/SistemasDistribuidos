@@ -11,13 +11,18 @@ import ViewEvents.CrearTableroEvent;
 import ViewEvents.ReconnectedEvent;
 import ViewEvents.ResultadoDisparoEvent;
 import ViewEvents.SalaEsperaEvent;
-import ViewEvents.StartBatallaEvent;
+import ViewEvents.EmpezarBatallaEvent;
 import ViewEvents.TryConnectionEvent;
 import ViewEvents.ViewListener;
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.Timer;
 import javax.swing.event.EventListenerList;
 import utils.Parse;
@@ -53,15 +58,18 @@ public class MainForm extends javax.swing.JFrame implements ViewListener{
     public String loggearUsuario(String nick, String password){
         String respuesta = this.cliente.loggearUsuario(nick, password);
         HashMap<String, String> info = (HashMap<String, String>) Parse.convertMessageToInfo(respuesta);
+        
         if(info.containsKey("COD") && info.get("COD").equals("200")){
             this.cliente.setNick(nick);
             this.cliente.startReadingMessage();
         }
+        System.out.println(respuesta);
         return respuesta;
     }
     public void loginExitoso(){
         user_name.setText("Usuario logueado : "+this.cliente.nick);
         mensaje.setText("Logueado exitosamente");
+        boton_iniciar_partida.setEnabled(true);
     }
     public void colocarBarco(int fil, int col, int size, char orientacion){
         this.cliente.colocarBarco(fil, col, size, orientacion);
@@ -70,7 +78,7 @@ public class MainForm extends javax.swing.JFrame implements ViewListener{
         this.cliente.entrarSalaEspera();
     }
     public void dispararA(int contrincante_session_id, int fila, int columna){
-        this.cliente.dispararA(contrincante_session_id, fila, columna);
+//        this.cliente.dispararA(contrincante_session_id, fila, columna);
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -81,55 +89,60 @@ public class MainForm extends javax.swing.JFrame implements ViewListener{
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        mensaje = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
+        jPanel1 = new javax.swing.JPanel();
         user_name = new javax.swing.JLabel();
+        mensaje = new javax.swing.JLabel();
+        boton_iniciar_partida = new javax.swing.JButton();
+        fondo_app = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setPreferredSize(new java.awt.Dimension(600, 338));
+        setResizable(false);
+        setSize(new java.awt.Dimension(600, 338));
 
-        jButton1.setText("Iniciar partida");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        user_name.setForeground(new java.awt.Color(255, 255, 255));
+        jPanel1.add(user_name, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, 250, 20));
+
+        mensaje.setBackground(new java.awt.Color(51, 51, 51));
+        mensaje.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        mensaje.setForeground(new java.awt.Color(255, 204, 0));
+        jPanel1.add(mensaje, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 250, 20));
+
+        boton_iniciar_partida.setText("Iniciar partida");
+        boton_iniciar_partida.setDisplayedMnemonicIndex(1);
+        boton_iniciar_partida.setEnabled(false);
+        boton_iniciar_partida.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                boton_iniciar_partidaActionPerformed(evt);
             }
         });
+        jPanel1.add(boton_iniciar_partida, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 230, -1, -1));
+
+        fondo_app.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/fondo_principal.gif"))); // NOI18N
+        jPanel1.add(fondo_app, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(mensaje, javax.swing.GroupLayout.DEFAULT_SIZE, 409, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(159, 159, 159)
-                        .addComponent(jButton1)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(user_name, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap())
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(0, 0, 0))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(user_name, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 174, Short.MAX_VALUE)
-                .addComponent(jButton1)
-                .addGap(51, 51, 51)
-                .addComponent(mensaje, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+            .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void boton_iniciar_partidaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_boton_iniciar_partidaActionPerformed
         this.cliente.crearTablero();
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_boton_iniciar_partidaActionPerformed
 
     /**
      * @param args the command line arguments
@@ -173,7 +186,6 @@ public class MainForm extends javax.swing.JFrame implements ViewListener{
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(tipo == 'C') animacionTryConnect();
-                else if(tipo == 'S') animacionSalaEspera();
                 if(tictac < 4)tictac++;
                 else tictac = 0;
             }
@@ -183,13 +195,12 @@ public class MainForm extends javax.swing.JFrame implements ViewListener{
         if(tictac == 0 )mensaje.setText("Intentando contectar al servidor");
         else mensaje.setText(mensaje.getText()+" . ");
     }
-    private void animacionSalaEspera(){
-        if(tictac == 0 )mensaje.setText("Esperando mas jugadores");
-        else mensaje.setText(mensaje.getText()+" . ");
-    }
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton boton_iniciar_partida;
+    private javax.swing.JLabel fondo_app;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel mensaje;
     private javax.swing.JLabel user_name;
     // End of variables declaration//GEN-END:variables
@@ -198,8 +209,9 @@ public class MainForm extends javax.swing.JFrame implements ViewListener{
     public void onConnected(ConnectedEvent event) {
         timer.stop();
         this.mensaje.setText("conectado al servidor");
+        mensaje.setForeground(Color.GREEN);
         
-        RegView registro = new RegView(this, true);
+        LoginView registro = new LoginView(this, false);
         registro.setVisible(true);
     }
 
@@ -209,6 +221,7 @@ public class MainForm extends javax.swing.JFrame implements ViewListener{
         String respuesta = this.cliente.reconectar();
         HashMap<String, String> info = (HashMap<String, String>) Parse.convertMessageToInfo(respuesta);
         this.mensaje.setText(info.get("MSJ"));
+        mensaje.setForeground(Color.GREEN);
         
         this.cliente.startReadingMessage();
     }
@@ -217,37 +230,34 @@ public class MainForm extends javax.swing.JFrame implements ViewListener{
     public void onTryConnection(TryConnectionEvent event) {
         this.tipo = 'C';
         this.tictac = 0;
+        mensaje.setForeground(Color.YELLOW);
+        
         if(timer.isRepeats() || timer.isRunning()) timer.restart();
         else timer.start();
     }
     @Override
     public void onCrearTablero(CrearTableroEvent event) {
         int dim = event.getDimencion();
-        CrearTablero crearTablero = new CrearTablero(this, true, dim);
+        CrearTablero crearTablero = new CrearTablero(this, false,cliente, dim);
         crearTablero.setTitle("Tablero de " + cliente.nick);
+        this.setVisible(false);
         crearTablero.setVisible(true);
     }
 
     @Override
-    public void onStartBatalla(StartBatallaEvent event) {
-        String contrincante_nick = event.getContrincante_nick();
-        int contrincante_session_id = event.getContrincante_session_id();
-        BatallaView batalla = new BatallaView(this, true, contrincante_session_id, contrincante_nick);
-        batalla.setVisible(true);
+    public void onEmpezarBatalla(EmpezarBatallaEvent event) {
+        boton_iniciar_partida.setEnabled(false);
+        System.out.println("comienza la batalla");
     }
 
     @Override
     public void onSalaEspera(SalaEsperaEvent event) {
-        this.tipo = 'S';
-        this.tictac = 0;
-        if(timer.isRepeats() || timer.isRunning()) timer.restart();
-        else timer.start();
+        
     }
 
     @Override
     public void onResultadoDisparo(ResultadoDisparoEvent event) {
-        BatallaEvents.ResultadoDisparoEvent batalla_events = new BatallaEvents.ResultadoDisparoEvent(event.getResultado(), event.getX(),event.getY(),this);
-        this.notifyResultadoDisparoEvent(batalla_events);
+        
     }
     /*------------------------------------------------------------------------*/
     protected EventListenerList listenerList = new EventListenerList();
@@ -266,4 +276,5 @@ public class MainForm extends javax.swing.JFrame implements ViewListener{
             }
         }
     }
+    
 }
